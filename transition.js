@@ -1,7 +1,3 @@
-window.onload = function() {
-	trans = new Transition();
-};
-
 function Transition(options){
 	this._init(options);
 	return this;
