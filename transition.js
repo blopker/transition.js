@@ -57,7 +57,7 @@ Transition.prototype = {
 		var self = this;
 		var set = self.settings;
 		$.get(href, function(data) {
-			content = self._getContent(data, set.contentClass);
+			var content = self._getContent(data, set.contentClass);
 
 			$("." + set.contentClass).children().addClass(set.oldClass);
 
