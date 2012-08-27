@@ -44,6 +44,7 @@ Transition.prototype = {
 	_clicked: function() {
 		var self = this;
 		return function(e) {
+			self.firstRun = false;
 			e.preventDefault();
 			self.go(this.href);
 		};
@@ -51,7 +52,6 @@ Transition.prototype = {
 
 	_swapContent: function(href) {
 		if (this.firstRun){
-			this.firstRun = false;
 			return;
 		}
 		var self = this;
