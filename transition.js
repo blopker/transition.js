@@ -13,7 +13,8 @@ Transition.prototype = {
 		linkSelector: '.transition',
 		oldClass: 'transition-old',
 		newClass: 'transition-new',
-		transistionFunc: self.fade
+		transistionFunc: self.fade,
+		completeCallback: function() {}
 		};
 	},
 
@@ -68,14 +69,15 @@ Transition.prototype = {
 			set.transistionFunc(set.oldClass, set.newClass, function() {
 				$("." + set.newClass).removeClass(set.newClass);
 				$("." + set.oldClass).remove();
+				set.completeCallback();
 			});
 		});
 	},
 
-	_getContent: function(html, selector) {
+	_getContent: function(html, content_class) {
 		var content = document.createElement('div');
 		content.innerHTML = html;
-		content = content.getElementsByClassName(selector)[0];
+		content = content.getElementsByClassName(content_class)[0];
 		return content;
 	},
 
