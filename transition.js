@@ -13,7 +13,7 @@ Transition.prototype = {
 		linkSelector: '.transition',
 		oldClass: 'transition-old',
 		newClass: 'transition-new',
-		transistionFunc: self.fade,
+		transitionFunc: self.fade,
 		completeCallback: function() {}
 		};
 	},
@@ -66,7 +66,7 @@ Transition.prototype = {
 			.hide()
 			.appendTo($("." + set.contentClass));
 
-			set.transistionFunc(set.oldClass, set.newClass, function() {
+			set.transitionFunc(set.oldClass, set.newClass, function() {
 				$("." + set.newClass).removeClass(set.newClass);
 				$("." + set.oldClass).remove();
 				set.completeCallback();
