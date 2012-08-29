@@ -69,6 +69,7 @@ Transition.prototype = {
 
 			set.beginCallback();
 			set.transitionFunc(set.oldClass, set.newClass, function() {
+				window.scrollTo(0, 0);
 				$("." + set.newClass).removeClass(set.newClass);
 				$("." + set.oldClass).remove();
 				set.completeCallback();
