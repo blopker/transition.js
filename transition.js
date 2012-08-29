@@ -14,6 +14,7 @@ Transition.prototype = {
 		oldClass: 'transition-old',
 		newClass: 'transition-new',
 		transitionFunc: self.fade,
+		beginCallback: function() {},
 		completeCallback: function() {}
 		};
 	},
@@ -66,6 +67,7 @@ Transition.prototype = {
 			.hide()
 			.appendTo($("." + set.contentClass));
 
+			set.beginCallback();
 			set.transitionFunc(set.oldClass, set.newClass, function() {
 				$("." + set.newClass).removeClass(set.newClass);
 				$("." + set.oldClass).remove();
