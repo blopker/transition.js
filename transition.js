@@ -36,7 +36,11 @@ Transition.prototype = {
 
 		var self = this;
 		window.addEventListener("popstate", function(e) {
-			self._transition(location.href);
+			$(self.settings.links).each(function() {
+				if (this.href === location.href) {
+					self._transition(location.href);
+				}
+			});
 		});
 	},
 
