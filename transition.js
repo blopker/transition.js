@@ -102,7 +102,7 @@ Transition.prototype.ajax = {
 
 	_getContent: function(pageHTML, holder) {
 		var self = this;
-		var content = $(pageHTML).filter(holder)[0];
+		var content = $(pageHTML).filter(holder);
 		return content;
 	},
 
