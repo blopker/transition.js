@@ -77,10 +77,10 @@ Transition.prototype = {
 		set.beginCallback();
 
 		set.transitionFunc(set.old, set.current, function() {
-				$old.hide().removeClass(set.active.slice(1))
+				$old.removeAttr("style").hide().removeClass(set.active.slice(1))
 				.removeClass(set.old.slice(1));
 				window.scrollTo(0, 0);
-				$new.removeClass(set.current.slice(1))
+				$new.removeAttr("style").removeClass(set.current.slice(1))
 				.addClass(set.active.slice(1));
 				self.cache.cleanInitial();
 				set.completeCallback();
