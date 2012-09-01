@@ -95,9 +95,6 @@ Transition.prototype.cache = {
 		var self = this;
 		this._markInitalContent();
 		$(sett.links).each(function() {
-			if(this.href === location.pathname){
-				return;
-			}
 			self._getContent(this.href);
 		});
 	},
@@ -120,10 +117,10 @@ Transition.prototype.cache = {
 		this._getPage(href, function(html) {
 			var content = document.createElement('div');
 			content.innerHTML = html;
-			content = $(self.settings.contentHolder, content);
+			content = $(self.settings.content, content);
 
 			content.each(function() {
-				$(this.innerHTML).addClass(self._hash(href))
+				$(this).addClass(self._hash(href))
 				.hide()
 				.appendTo($(self.settings.contentHolder));
 			});
