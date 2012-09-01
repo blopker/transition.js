@@ -1,5 +1,6 @@
 function Transition(options){
 	this._init(options);
+	this.self = this;
 	return this;
 }
 
@@ -9,11 +10,13 @@ Transition.prototype = {
 		var self = this;
 		return {
 		name: 'Transition.js',
-		contentClass: 'content',
-		linkSelector: '.transition',
-		oldClass: 'transition-old',
-		newClass: 'transition-new',
-		transitionFunc: self.fade,
+		contentHolder: '.content',
+		content: 'section',
+		links: '.transition',
+		old: '.transition-old',
+		current: '.transition-new',
+		active: '.transition-active',
+		transitionFunc: self.transitions.fade,
 		beginCallback: function() {},
 		completeCallback: function() {}
 		};
@@ -29,13 +32,17 @@ Transition.prototype = {
 		this._createSettings(options);
 		this.go = this.go.bind(this);
 		this._swapContent = this._swapContent.bind(this);
-
-		$(this.settings.linkSelector).click(this._clicked());
-
+		$(this.settings.content).addClass(this.settings.active.slice(1));
+		$(this.settings.links).click(this._clicked());
+		this._cache();
 		var self = this;
 		window.addEventListener("popstate", function(e) {
-			self._swapContent(location.pathname);
+			self._swapContent(location.href);
 		});
+	},
+
+	_cache: function() {
+		this.cache.init(this.settings);
 	},
 
 	_createSettings: function(options) {
@@ -58,37 +65,96 @@ Transition.prototype = {
 		}
 		var self = this;
 		var set = self.settings;
-		$.get(href, function(data) {
-			var content = self._getContent(data, set.contentClass);
+		var $new = this.cache.get(href);
+		if ($new.hasClass(set.active.slice(1))) {
+			return;
+		}
+		var $old = $(set.active);
 
-			$("." + set.contentClass).children().addClass(set.oldClass);
+		$old.addClass(set.old.slice(1));
+		$new.addClass(set.current.slice(1)).hide();
 
-			$(content.innerHTML).addClass(set.newClass)
-			.hide()
-			.appendTo($("." + set.contentClass));
+		set.beginCallback();
 
-			set.beginCallback();
-			set.transitionFunc(set.oldClass, set.newClass, function() {
+		set.transitionFunc(set.old, set.current, function() {
+				$old.hide().removeClass(set.active.slice(1))
+				.removeClass(set.old.slice(1));
 				window.scrollTo(0, 0);
-				$("." + set.newClass).removeClass(set.newClass);
-				$("." + set.oldClass).remove();
+				$new.removeClass(set.current.slice(1))
+				.addClass(set.active.slice(1));
+				self.cache.cleanInitial();
 				set.completeCallback();
 			});
+	}
+};
+
+
+Transition.prototype.cache = {
+	init: function(sett) {
+		this.settings = sett;
+		var self = this;
+		this._markInitalContent();
+		$(sett.links).each(function() {
+			if(this.href === location.pathname){
+				return;
+			}
+			self._getContent(this.href);
 		});
 	},
 
-	_getContent: function(html, content_class) {
-		var content = document.createElement('div');
-		content.innerHTML = html;
-		content = content.getElementsByClassName(content_class)[0];
-		return content;
+	get: function(href) {
+		var hash = this._hash(href);
+		return $('.' + hash);
 	},
 
-	fade: function(oldClass, newClass, callback) {
-		$("." + oldClass).fadeOut('', function() {
-			$("." + newClass).fadeIn('', callback);
+	cleanInitial: function() {
+		$('.trans-initial').remove();
+	},
+
+	_markInitalContent: function() {
+		$(this.settings.content).addClass('trans-initial');
+	},
+
+	_getContent: function(href) {
+		var self = this;
+		this._getPage(href, function(html) {
+			var content = document.createElement('div');
+			content.innerHTML = html;
+			content = $(self.settings.contentHolder, content);
+
+			content.each(function() {
+				$(this.innerHTML).addClass(self._hash(href))
+				.hide()
+				.appendTo($(self.settings.contentHolder));
+			});
+		});
+
+	},
+
+	_getPage: function(href, callback) {
+		$.get(href, function(data) {
+			callback(data);
+		});
+	},
+
+	_hash: function(href) {
+		var hash = 0;
+		if (href.length === 0) return hash;
+		for (i = 0; i < href.length; i++) {
+			char = href.charCodeAt(i);
+			hash = ((hash<<5)-hash)+char;
+			hash = hash & hash; // Convert to 32bit integer
+		}
+		hash = "trans-" + hash;
+		return hash;
+	}
+};
+
+Transition.prototype.transitions = {
+	fade: function(oldSelector, newSelector, callback) {
+		$(oldSelector).fadeOut('', function() {
+			$(newSelector).fadeIn('', callback);
 		});
 
 	}
 };
-
