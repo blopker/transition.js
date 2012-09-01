@@ -11,7 +11,6 @@ Transition.prototype = {
 		return {
 		name: 'Transition.js',
 		contentHolder: '.content',
-		content: 'section',
 		links: '.transition',
 		old: '.transition-old',
 		current: '.transition-new',
@@ -23,7 +22,7 @@ Transition.prototype = {
 	},
 
 	go: function(href) {
-		this._swapContent(href);
+		this._transition(href);
 		history.pushState(null, null, href);
 	},
 
@@ -32,17 +31,17 @@ Transition.prototype = {
 		this._createSettings(options);
 		this.go = this.go.bind(this);
 		this._swapContent = this._swapContent.bind(this);
-		$(this.settings.content).addClass(this.settings.active.slice(1));
+
 		$(this.settings.links).click(this._clicked());
-		this._cache();
+
 		var self = this;
 		window.addEventListener("popstate", function(e) {
-			self._swapContent(location.href);
+			self._transition(location.href);
 		});
 	},
 
-	_cache: function() {
-		this.cache.init(this.settings);
+	_getContent: function(href, callback) {
+		this.ajax.get(href, this.settings.contentHolder, callback);
 	},
 
 	_createSettings: function(options) {
@@ -59,91 +58,58 @@ Transition.prototype = {
 		};
 	},
 
-	_swapContent: function(href) {
+	_transition: function(href) {
 		if (this.firstRun){
 			return;
 		}
 		var self = this;
-		var set = self.settings;
-		var $new = this.cache.get(href);
-		if ($new.hasClass(set.active.slice(1))) {
-			return;
-		}
-		var $old = $(set.active);
+		this._getContent(href, function(content) {
+			self._swapContent(content);
+		});
+	},
 
-		$old.addClass(set.old.slice(1));
+	_swapContent: function(content) {
+
+		var self = this;
+		var set = self.settings;
+		var $new = $(content);
+		var $old = $(set.contentHolder);
+
 		$new.addClass(set.current.slice(1)).hide();
+		$old.addClass(set.old.slice(1)).after($new);
 
 		set.beginCallback();
 
 		set.transitionFunc(set.old, set.current, function() {
-				$old.removeAttr("style").hide().removeClass(set.active.slice(1))
-				.removeClass(set.old.slice(1));
+				$old.remove();
 				window.scrollTo(0, 0);
-				$new.removeAttr("style").removeClass(set.current.slice(1))
-				.addClass(set.active.slice(1));
-				self.cache.cleanInitial();
+				$new.removeClass(set.current.slice(1));
 				set.completeCallback();
 			});
 	}
 };
 
 
-Transition.prototype.cache = {
-	init: function(sett) {
-		this.settings = sett;
+Transition.prototype.ajax = {
+
+	get: function(href, holder, callback) {
 		var self = this;
-		this._markInitalContent();
-		$(sett.links).each(function() {
-			self._getContent(this.href);
+		this._getPage(href, function(pageHTML) {
+			var content = self._getContent(pageHTML, holder);
+			callback(content);
 		});
 	},
 
-	get: function(href) {
-		var hash = this._hash(href);
-		return $('.' + hash);
-	},
-
-	cleanInitial: function() {
-		$('.trans-initial').remove();
-	},
-
-	_markInitalContent: function() {
-		$(this.settings.content).addClass('trans-initial');
-	},
-
-	_getContent: function(href) {
+	_getContent: function(pageHTML, holder) {
 		var self = this;
-		this._getPage(href, function(html) {
-			var content = document.createElement('div');
-			content.innerHTML = html;
-			content = $(self.settings.content, content);
-
-			content.each(function() {
-				$(this).addClass(self._hash(href))
-				.hide()
-				.appendTo($(self.settings.contentHolder));
-			});
-		});
-
+		var content = $(pageHTML).filter(holder)[0];
+		return content;
 	},
 
 	_getPage: function(href, callback) {
 		$.get(href, function(data) {
 			callback(data);
 		});
-	},
-
-	_hash: function(href) {
-		var hash = 0;
-		if (href.length === 0) return hash;
-		for (i = 0; i < href.length; i++) {
-			char = href.charCodeAt(i);
-			hash = ((hash<<5)-hash)+char;
-			hash = hash & hash; // Convert to 32bit integer
-		}
-		hash = "trans-" + hash;
-		return hash;
 	}
 };
 
