@@ -34,9 +34,14 @@ Transition.prototype = {
 
 		$(this.settings.links).click(this._clicked());
 
+		this.scrollPos = 0;
+
+		setInterval(this._getScrollPos(), 1000);
+
 		var self = this;
 		window.addEventListener("popstate", function(e) {
-			e.preventDefault();
+			// Hack to stop back button from scrolling.
+			$(window).scrollTo(self.scrollPos);
 			$(self.settings.links).each(function() {
 				if (this.href === location.href) {
 					self._transition(location.href);
@@ -91,6 +96,13 @@ Transition.prototype = {
 				$new.removeClass(set.current.slice(1));
 				set.completeCallback();
 			});
+	},
+
+	_getScrollPos: function() {
+		var self = this;
+		return function() {
+			self.scrollPos = $(window).scrollTop();
+		};
 	}
 };
 
