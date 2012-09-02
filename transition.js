@@ -123,6 +123,7 @@ Transition.prototype.ajax = {
 Transition.prototype.transitions = {
 	fade: function(oldSelector, newSelector, callback) {
 		$(oldSelector).fadeOut('', function() {
+			$(this).remove();
 			$(newSelector).fadeIn('', callback);
 		});
 
