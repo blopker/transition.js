@@ -36,6 +36,7 @@ Transition.prototype = {
 
 		var self = this;
 		window.addEventListener("popstate", function(e) {
+			e.preventDefault();
 			$(self.settings.links).each(function() {
 				if (this.href === location.href) {
 					self._transition(location.href);
@@ -123,7 +124,6 @@ Transition.prototype.ajax = {
 Transition.prototype.transitions = {
 	fade: function(oldSelector, newSelector, callback) {
 		$(oldSelector).fadeOut('', function() {
-			$(this).remove();
 			$(newSelector).fadeIn('', callback);
 		});
 
