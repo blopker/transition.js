@@ -34,17 +34,18 @@ Transition.prototype = {
 
 		$(this.settings.links).click(this._clicked());
 
-		this.scrollPos = 0;
-
-		setInterval(this._getScrollPos(), 1000);
-
 		var self = this;
+		var first_time = true;
 		window.addEventListener("popstate", function(e) {
-			// Hack to stop back button from scrolling.
-			$(window).scrollTo(self.scrollPos);
+			// Chome fires popstate on page load...
+			if (first_time) {
+				first_time = false;
+				return;
+			}
+			// Reload last page b/c popstate scroll bug.
 			$(self.settings.links).each(function() {
 				if (this.href === location.href) {
-					self._transition(location.href);
+					window.location.replace(location.href);
 				}
 			});
 		});
@@ -96,39 +97,16 @@ Transition.prototype = {
 				$new.removeClass(set.current.slice(1));
 				set.completeCallback();
 			});
-	},
-
-	_getScrollPos: function() {
-		var self = this;
-		return function() {
-			self.scrollPos = $(window).scrollTop();
-		};
 	}
+
 };
 
 
 Transition.prototype.ajax = {
-
 	get: function(href, holder, callback) {
 		var self = this;
-		this._getPage(href, function(pageHTML) {
-			var content = self._getContent(pageHTML, holder);
-			callback(content);
-		});
-	},
-
-	_getContent: function(pageHTML, holder) {
-		var self = this;
-		var content = document.createElement('div');
-		content.innerHTML = pageHTML;
-		content = content.getElementsByClassName(holder.slice(1))[0];
-		// var content = $('<div>').html(pageHTML).find(holder)[0];
-		return content;
-	},
-
-	_getPage: function(href, callback) {
-		$.get(href, function(data) {
-			callback(data);
+		$('<div>').load(href + " " + holder, function(text) {
+			callback(this);
 		});
 	}
 };
