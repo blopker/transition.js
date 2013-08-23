@@ -1,3 +1,3 @@
 Transition.js
 -------------
-Demo: http://ninj0x.github.com/transition.js/example/
+Demo: http://blopker.github.com/transition.js/example/
